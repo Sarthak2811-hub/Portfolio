@@ -8,11 +8,12 @@ import { Projects } from './components/Projects';
 import { Skills } from './components/Skills';
 import { Terminal } from './components/Terminal';
 import { Contact } from './components/Contact';
-import { Code2, PenTool, Database, Command, Cpu } from 'lucide-react';
+import { Code2, PenTool, Database, Command, Cpu, Menu, X } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sketcher' | 'docbrain'>('sketcher');
   const [activeSection, setActiveSection] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Reset scroll on refresh and disable browser scroll restoration
   useEffect(() => {
@@ -60,12 +61,21 @@ const App: React.FC = () => {
 
       {/* Floating Header */}
       <header className="navbar-header">
-        <div className="navbar-logo clickable" onClick={() => scrollToSection('home')}>
+        <div className="navbar-logo clickable" onClick={() => { scrollToSection('home'); setMobileMenuOpen(false); }}>
           <Code2 size={22} className="logo-accent animate-pulse" />
           <span className="logo-text">Sarthak.Systems</span>
         </div>
 
-        <nav className="navbar-links">
+        {/* Mobile Hamburger toggle button */}
+        <button 
+          className="mobile-menu-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+
+        <nav className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           {[
             { id: 'home', label: 'Home' },
             { id: 'playground', label: 'Playground' },
@@ -77,7 +87,10 @@ const App: React.FC = () => {
             <button
               key={item.id}
               className={`nav-link-btn clickable ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => scrollToSection(item.id)}
+              onClick={() => {
+                scrollToSection(item.id);
+                setMobileMenuOpen(false);
+              }}
             >
               {item.label}
             </button>

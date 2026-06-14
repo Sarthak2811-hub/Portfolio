@@ -175,7 +175,9 @@ export const Terminal: React.FC = () => {
           placeholder='Type a command (e.g. "help", "skills")...'
           autoComplete="off"
           autoCorrect="off"
-          autoCapitalize="off"
+          autoCapitalize="none"
+          title="Terminal CLI Command Input"
+          aria-label="Terminal CLI Command Input"
         />
       </form>
     </div>

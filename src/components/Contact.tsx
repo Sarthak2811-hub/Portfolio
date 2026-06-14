@@ -125,6 +125,7 @@ export const Contact: React.FC = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     disabled={status === 'submitting'}
+                    autoComplete="name"
                   />
                 </div>
 
@@ -140,6 +141,7 @@ export const Contact: React.FC = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={status === 'submitting'}
+                    autoComplete="email"
                   />
                 </div>
               </div>
@@ -155,6 +157,7 @@ export const Contact: React.FC = () => {
                   value={formData.subject}
                   onChange={handleInputChange}
                   disabled={status === 'submitting'}
+                  autoComplete="off"
                 />
               </div>
 
@@ -170,6 +173,7 @@ export const Contact: React.FC = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   disabled={status === 'submitting'}
+                  autoComplete="off"
                 />
               </div>
 

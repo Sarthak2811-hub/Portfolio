@@ -26,11 +26,11 @@ interface Shape {
 export const SketcherSandbox: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  
+
   const [tool, setTool] = useState<'pencil' | 'rectangle' | 'circle' | 'arrow' | 'pan'>('pencil');
   const [color, setColor] = useState('#8b5cf6'); // Neon Violet
   const [strokeWidth, setStrokeWidth] = useState(3);
-  
+
   const [shapes, setShapes] = useState<Shape[]>([
     // Prefill with a nice default diagram showing whiteboard collaboration
     { id: '1', type: 'rectangle', color: '#14b8a6', strokeWidth: 2, x: 50, y: 50, width: 140, height: 60, creator: 'jane' },
@@ -44,7 +44,7 @@ export const SketcherSandbox: React.FC = () => {
   const [pan, setPan] = useState({ x: 50, y: 80 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
-  
+
   // Drawing states
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [startPos, setStartPos] = useState<Point>({ x: 0, y: 0 });
@@ -127,17 +127,17 @@ export const SketcherSandbox: React.FC = () => {
           ctx.lineTo(shape.points[i].x, shape.points[i].y);
         }
         ctx.stroke();
-      } 
+      }
       else if (shape.type === 'rectangle' && shape.x !== undefined && shape.y !== undefined && shape.width !== undefined && shape.height !== undefined) {
         ctx.beginPath();
         ctx.rect(shape.x, shape.y, shape.width, shape.height);
         ctx.stroke();
-      } 
+      }
       else if (shape.type === 'circle' && shape.x !== undefined && shape.y !== undefined && shape.radius !== undefined) {
         ctx.beginPath();
         ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
         ctx.stroke();
-      } 
+      }
       else if (shape.type === 'arrow' && shape.x !== undefined && shape.y !== undefined && shape.x2 !== undefined && shape.y2 !== undefined) {
         // Draw main shaft
         ctx.beginPath();
@@ -180,20 +180,20 @@ export const SketcherSandbox: React.FC = () => {
         ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
         currentPoints.forEach((p) => ctx.lineTo(p.x, p.y));
         ctx.stroke();
-      } 
+      }
       else if (tool === 'rectangle') {
         const w = currentPos.x - startPos.x;
         const h = currentPos.y - startPos.y;
         ctx.beginPath();
         ctx.rect(startPos.x, startPos.y, w, h);
         ctx.stroke();
-      } 
+      }
       else if (tool === 'circle') {
         const r = Math.sqrt(Math.pow(currentPos.x - startPos.x, 2) + Math.pow(currentPos.y - startPos.y, 2));
         ctx.beginPath();
         ctx.arc(startPos.x, startPos.y, r, 0, Math.PI * 2);
         ctx.stroke();
-      } 
+      }
       else if (tool === 'arrow') {
         ctx.beginPath();
         ctx.moveTo(startPos.x, startPos.y);
@@ -232,6 +232,27 @@ export const SketcherSandbox: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [shapes, zoom, pan]);
+
+  // Prevent background touch scrolling when drawing/interacting with whiteboard
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const preventDefault = (e: TouchEvent) => {
+      if (e.target === canvas) {
+        e.preventDefault();
+      }
+    };
+
+    // Use non-passive events to ensure preventDefault() works
+    canvas.addEventListener('touchstart', preventDefault, { passive: false });
+    canvas.addEventListener('touchmove', preventDefault, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', preventDefault);
+      canvas.removeEventListener('touchmove', preventDefault);
+    };
+  }, []);
 
   // Drawing event handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -288,7 +309,7 @@ export const SketcherSandbox: React.FC = () => {
         points: currentPoints,
         creator: 'user',
       };
-    } 
+    }
     else if (tool === 'rectangle') {
       const w = currentPos.x - startPos.x;
       const h = currentPos.y - startPos.y;
@@ -305,7 +326,7 @@ export const SketcherSandbox: React.FC = () => {
           creator: 'user',
         };
       }
-    } 
+    }
     else if (tool === 'circle') {
       const r = Math.sqrt(Math.pow(currentPos.x - startPos.x, 2) + Math.pow(currentPos.y - startPos.y, 2));
       if (r > 5) {
@@ -320,7 +341,7 @@ export const SketcherSandbox: React.FC = () => {
           creator: 'user',
         };
       }
-    } 
+    }
     else if (tool === 'arrow') {
       const dist = Math.sqrt(Math.pow(currentPos.x - startPos.x, 2) + Math.pow(currentPos.y - startPos.y, 2));
       if (dist > 5) {
@@ -344,6 +365,50 @@ export const SketcherSandbox: React.FC = () => {
     }
 
     setCurrentPoints([]);
+  };
+
+  // Touch event handlers for mobile drawing support
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (tool === 'pan') {
+        setIsPanning(true);
+        setPanStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+        return;
+      }
+
+      const coords = getCanvasCoords(touch.clientX, touch.clientY);
+      setIsDrawing(true);
+      setStartPos(coords);
+      setCurrentPos(coords);
+      if (tool === 'pencil') {
+        setCurrentPoints([coords]);
+      }
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (isPanning) {
+        setPan({
+          x: touch.clientX - panStart.x,
+          y: touch.clientY - panStart.y,
+        });
+        return;
+      }
+
+      if (!isDrawing) return;
+      const coords = getCanvasCoords(touch.clientX, touch.clientY);
+      setCurrentPos(coords);
+      if (tool === 'pencil') {
+        setCurrentPoints((prev) => [...prev, coords]);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handleMouseUp();
   };
 
   // Simulate multiplayer peer action after a user draws a shape
@@ -397,7 +462,7 @@ export const SketcherSandbox: React.FC = () => {
         text: 'Sync Active!',
         creator: 'jane',
       };
-      
+
       const janeArrowShape: Shape = {
         id: `jane-arrow-${Date.now()}`,
         type: 'arrow',
@@ -506,12 +571,20 @@ export const SketcherSandbox: React.FC = () => {
 
           {/* Preset Colors */}
           <div className="color-selectors">
-            {['#8b5cf6', '#14b8a6', '#f43f5e', '#eab308', '#f8fafc'].map((c) => (
+            {[
+              { hex: '#8b5cf6', name: 'Violet' },
+              { hex: '#14b8a6', name: 'Teal' },
+              { hex: '#f43f5e', name: 'Red' },
+              { hex: '#eab308', name: 'Yellow' },
+              { hex: '#f8fafc', name: 'White' },
+            ].map((c) => (
               <button
-                key={c}
-                className={`color-dot ${color === c ? 'active' : ''}`}
-                style={{ backgroundColor: c }}
-                onClick={() => setColor(c)}
+                key={c.hex}
+                className={`color-dot ${color === c.hex ? 'active' : ''}`}
+                style={{ backgroundColor: c.hex }}
+                onClick={() => setColor(c.hex)}
+                title={`Select ${c.name} color`}
+                aria-label={`Select ${c.name} color`}
               />
             ))}
           </div>
@@ -523,11 +596,16 @@ export const SketcherSandbox: React.FC = () => {
             <span className="stroke-label">{strokeWidth}px</span>
             <input
               type="range"
+              id="stroke-width-slider"
+              name="stroke-width-slider"
               min="1"
               max="12"
               value={strokeWidth}
               onChange={(e) => setStrokeWidth(Number(e.target.value))}
               className="stroke-slider"
+              title="Stroke Width Slider"
+              aria-label="Stroke Width Slider"
+              autoComplete="off"
             />
           </div>
         </div>
@@ -544,7 +622,7 @@ export const SketcherSandbox: React.FC = () => {
           <button className="control-btn" onClick={resetView} title="Reset Scale & Pan">
             <RotateCcw size={16} />
           </button>
-          
+
           <div className="toolbox-divider-h" />
 
           <button className="control-btn hover-danger" onClick={undoLast} title="Undo last shape">
@@ -570,6 +648,9 @@ export const SketcherSandbox: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           className={`sketcher-canvas ${tool === 'pan' ? 'cursor-pan' : 'cursor-crosshair'}`}
         />
 

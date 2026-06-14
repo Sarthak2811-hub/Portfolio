@@ -403,11 +403,16 @@ export const DocBrainConsole: React.FC = () => {
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               disabled={step !== 0 || rateLimitBlock}
+              title="DocBrain Query Input"
+              aria-label="DocBrain Query Input"
+              autoComplete="off"
             />
             <button
               type="submit"
               className="chat-submit-btn clickable"
               disabled={step !== 0 || rateLimitBlock || !inputVal.trim()}
+              title="Submit Query"
+              aria-label="Submit Query"
             >
               <Send size={16} />
             </button>

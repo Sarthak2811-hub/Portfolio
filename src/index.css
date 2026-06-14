@@ -80,6 +80,7 @@ body {
   align-items: center;
   padding: 0 4rem;
   background: rgba(3, 2, 6, 0.75);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--glass-border);
   z-index: 1000;
@@ -128,10 +129,18 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.nav-link-btn.active {
-  color: var(--accent-secondary);
-  background: rgba(20, 184, 166, 0.08);
-  border: 1px solid rgba(20, 184, 166, 0.15);
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  color: var(--text-primary);
 }
 
 /* Custom Cursor Classes */
@@ -429,6 +438,7 @@ section {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   width: 100%;
   min-height: 550px;
@@ -550,6 +560,7 @@ section {
   align-items: center;
   gap: 0.4rem;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   z-index: 5;
 }
@@ -654,6 +665,7 @@ section {
   align-items: center;
   gap: 0.4rem;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   z-index: 5;
 }
@@ -739,6 +751,7 @@ section {
   align-items: center;
   gap: 0.5rem;
   z-index: 5;
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -975,6 +988,7 @@ section {
   align-items: center;
   gap: 0.5rem;
   z-index: 5;
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -1315,6 +1329,7 @@ section {
   border-radius: 16px;
   padding: 2.5rem;
   box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   transition: border-color 0.3s ease;
 }
@@ -1550,6 +1565,7 @@ section {
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 1.8rem;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   position: relative;
   overflow: hidden;
@@ -1911,6 +1927,7 @@ section {
   border-radius: 16px;
   padding: 2.2rem;
   box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   min-height: 380px;
   display: flex;
@@ -2077,6 +2094,12 @@ section {
 }
 
 /* Responsive Styling Adjustments */
+@media (hover: none) {
+  .custom-cursor-ring {
+    display: none !important;
+  }
+}
+
 @media (max-width: 1024px) {
   .navbar-header {
     padding: 0 2rem;
@@ -2091,6 +2114,11 @@ section {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+  .project-visual-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
   .contact-layout-split {
     grid-template-columns: 1fr;
     gap: 2.5rem;
@@ -2100,32 +2128,186 @@ section {
   }
 }
 
-@media (max-width: 768px) {
-  .navbar-header {
-    flex-direction: column;
+@media (max-width: 900px) {
+  .docbrain-container {
     height: auto;
-    padding: 1rem;
-    gap: 0.5rem;
-    position: static;
-  }
-  .navbar-links {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  .hero-title {
-    font-size: 2.4rem;
+    min-height: 700px;
   }
   .docbrain-console {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
   .docbrain-sidebar {
     border-right: none;
     border-bottom: 1px solid var(--glass-border);
+    max-height: 250px;
   }
+  .docbrain-chat-pane {
+    height: 480px;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+    z-index: 1001;
+  }
+
+  .navbar-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    background: rgba(3, 2, 6, 0.95);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    z-index: 1000;
+  }
+
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: rgba(8, 7, 13, 0.98);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    gap: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+    z-index: 999;
+  }
+
+  .navbar-links.mobile-open {
+    display: flex;
+    animation: slideDown 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .nav-link-btn {
+    width: 100%;
+    text-align: left;
+    padding: 0.8rem 1rem;
+  }
+
+  section {
+    padding: 5rem 1.25rem 3rem 1.25rem;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+    line-height: 1.2;
+    letter-spacing: -1px;
+  }
+
+  .hero-cta-buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    gap: 1rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-pill-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .sandbox-tab-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto 2rem auto;
+  }
+
+  .tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sketcher-container {
+    height: auto;
+    min-height: 550px;
+  }
+
+  .sketcher-workspace {
+    height: 400px;
+  }
+
+  .canvas-toolbox {
+    width: calc(100% - 2rem);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.4rem;
+  }
+
+  .stroke-selector {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .stroke-slider {
+    flex-grow: 1;
+  }
+
+  .canvas-viewport-controls {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .project-card-full {
+    padding: 1.5rem;
+  }
+
+  .project-header-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .skills-categories-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .skills-cat-card {
+    padding: 1.2rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
+
+  .contact-form-panel {
+    padding: 1.5rem;
+  }
+
   .footer-content {
     flex-direction: column;
     gap: 1rem;
