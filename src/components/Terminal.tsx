@@ -22,7 +22,7 @@ export const Terminal: React.FC = () => {
     }
   }, [history]);
 
-  const handleCommand = (e: React.FormEvent) => {
+  const handleCommand = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const cleanCmd = cmdInput.trim().toLowerCase();
     if (!cleanCmd) return;
